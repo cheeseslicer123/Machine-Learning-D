@@ -1,0 +1,82 @@
+#ML project Stage 2 code
+
+import numpy as np 
+import pandas as pd 
+import matplotlib.pyplot as plt  
+import seaborn as sns 
+from sklearn.model_selection import train_test_split 
+from sklearn import tree 
+from sklearn.tree import DecisionTreeClassifier 
+from sklearn.metrics import accuracy_score 
+from sklearn.model_selection import GridSearchCV
+
+#Reading dataset
+#Reducing data from 70,000 data points to 10,000 data points
+nRowsRead = 10000
+df = pd.read_csv('cardio_train.csv',sep=";", nrows = nRowsRead)
+
+df.shape
+
+df.head()
+
+
+#Data Analysis and Visualization
+df.isnull().sum()
+
+sns.countplot(df['cardio'])
+plt.tight_layout()
+
+df['cardio'].value_counts()
+
+
+#Preprocessing
+X = df.drop('cardio', axis=1)
+Y = df['cardio']
+
+
+#Correlation between the features
+correlation = df.corr()
+plt.subplots(figsize=(15,10))
+sns.heatmap(correlation, annot=True)
+
+
+#Train and test split
+x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+
+a = x_train.shape
+b = x_test.shape
+print("Shape of x_train data: ", a)
+print("Shape of x_test data: ", b)
+
+
+#Decision Tree Method
+method = DecisionTreeClassifier()
+method.fit(x_train, y_train)
+
+y_pred = method.predict(x_test)
+
+accuracy = accuracy_score(y_pred, y_test)
+print("Accuracy: ", accuracy)
+
+tree.plot_tree(method)
+
+
+#Using GridSearchCV
+parameters = {"max_depth": range(1,6), "max_features": range(1,10), "criterion": ["gini", "entropy"]}
+
+decisiontreecv = GridSearchCV(method, parameters, cv=5)
+decisiontreecv.fit(x_train,y_train)
+print(decisiontreecv.best_params_)
+
+
+x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+
+second_method = DecisionTreeClassifier(criterion = "gini", max_depth=2, max_features=9)
+second_method.fit(x_train, y_train)
+y_pred_second = method.predict(x_test)
+new_accuracy = accuracy_score( y_test, y_pred_second)
+print("Accuracy: ", new_accuracy)
+
+features=['id','age','gender','height','weight','systolic','diastolic','cholesterol','glucose','smoking','alcohol','activity']
+tree.plot_tree(second_method, feature_names = features)
+
